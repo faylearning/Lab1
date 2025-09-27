@@ -45,20 +45,83 @@ def apply_sequence(stack, sequence):
         new_stack.flip_stack(flip)
     return new_stack
 
+
+
+
+
+
 def breadth_first_search(stack):
-    flip_sequence = []
+    flipList = []
 
     # --- v ADD YOUR CODE HERE v --- #
-
-    return flip_sequence
+    if stack.check_ordered():
+        return flipList
+    
+    # Level-by-level exploration using queue
+    exqueue = deque()
+    exqueue.append((stack, []))
+    visited = set()
+    
+    def create_state_hash(bstack):
+        return (tuple(bstack.order), tuple(bstack.orientations))
+    
+    visited.add(create_state_hash(stack))
+    
+    while  exqueue:
+        currbooks, path_so_far =  exqueue.popleft()
+        
+        #every possible flip operation
+        for flip_at in range(1, currbooks.num_books + 1):
+            new_books = currbooks.copy()
+            new_books.flip_stack(flip_at)
+            new_path = path_so_far + [flip_at]
+        
+            if new_books.check_ordered():
+                return new_path
+            
+            #avoid revisiting 
+            state_hash = create_state_hash(new_books)
+            if state_hash not in visited:
+                visited.add(state_hash)
+                exqueue.append((new_books, new_path))
+    
+    return flipList
     # ---------------------------- #
 
 
 def depth_first_search(stack):
-    flip_sequence = []
+    flipList = []
 
     # --- v ADD YOUR CODE HERE v --- #
-
-
-    return flip_sequence
+    if stack.check_ordered():
+        return flipList
+    
+    work_stack = [(stack, [])]
+    explored = set()
+    
+    def makeId(arrangement):
+        return (tuple(arrangement.order), tuple(arrangement.orientations))
+    
+    explored.add(makeId(stack))
+    
+    while work_stack:
+        book_config, moves_made = work_stack.pop()
+        
+        #all possible next moves
+        for move in range(1, book_config.num_books + 1):
+            next_config = book_config.copy()
+            next_config.flip_stack(move)
+            updated_moves = moves_made + [move]
+            
+            #check if solved
+            if next_config.check_ordered():
+                return updated_moves
+            
+            #skip if visited
+            config_id = makeId(next_config)
+            if config_id not in explored:
+                explored.add(config_id)
+                work_stack.append((next_config, updated_moves))
+    
+    return flipList
     # ---------------------------- #
