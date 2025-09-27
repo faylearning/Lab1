@@ -46,7 +46,10 @@ def apply_sequence(stack, sequence):
     return new_stack
 
 
-
+def createHash(stack_obj):
+        order_str = ','.join(map(str, stack_obj.order))
+        orient_str = ','.join(map(str, stack_obj.orientations))
+        return f"{order_str}|{orient_str}"
 
 
 
@@ -57,18 +60,13 @@ def breadth_first_search(stack):
     if stack.check_ordered():
         return flipList
     
-    # Level-by-level exploration using queue
     exqueue = deque()
     exqueue.append((stack, []))
     visited = set()
+    visited.add(createHash(stack))
     
-    def create_state_hash(bstack):
-        return (tuple(bstack.order), tuple(bstack.orientations))
-    
-    visited.add(create_state_hash(stack))
-    
-    while  exqueue:
-        currbooks, path_so_far =  exqueue.popleft()
+    while exqueue:
+        currbooks, path_so_far = exqueue.popleft()
         
         #every possible flip operation
         for flip_at in range(1, currbooks.num_books + 1):
@@ -80,7 +78,7 @@ def breadth_first_search(stack):
                 return new_path
             
             #avoid revisiting 
-            state_hash = create_state_hash(new_books)
+            state_hash = createHash(new_books)
             if state_hash not in visited:
                 visited.add(state_hash)
                 exqueue.append((new_books, new_path))
@@ -99,10 +97,7 @@ def depth_first_search(stack):
     work_stack = [(stack, [])]
     explored = set()
     
-    def makeId(arrangement):
-        return (tuple(arrangement.order), tuple(arrangement.orientations))
-    
-    explored.add(makeId(stack))
+    explored.add(createHash(stack))
     
     while work_stack:
         book_config, moves_made = work_stack.pop()
@@ -118,7 +113,7 @@ def depth_first_search(stack):
                 return updated_moves
             
             #skip if visited
-            config_id = makeId(next_config)
+            config_id = createHash(next_config)
             if config_id not in explored:
                 explored.add(config_id)
                 work_stack.append((next_config, updated_moves))
